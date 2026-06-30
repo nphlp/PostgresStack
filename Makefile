@@ -13,11 +13,9 @@ $(ROOT).env:
 postgres: $(ROOT).env
 	@$(DC) up -d --wait
 	@echo ""
-	@echo "🐘 Postgres    localhost:$$(sed -n 's/^POSTGRES_PORT=//p' $(ROOT).env)"
-	@echo "📬 Mailpit     http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
-	@echo "🗄  Adminer     http://localhost:$$(sed -n 's/^ADMINER_PORT=//p' $(ROOT).env)"
-	@echo "🐘 pgAdmin     http://localhost:$$(sed -n 's/^PGADMIN_PORT=//p' $(ROOT).env)"
-	@echo "🦫 CloudBeaver http://localhost:$$(sed -n 's/^CLOUDBEAVER_PORT=//p' $(ROOT).env)"
+	@echo "🐘 Postgres  localhost:$$(sed -n 's/^POSTGRES_PORT=//p' $(ROOT).env)"
+	@echo "📬 Mailpit   http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
+	@echo "🗄  Adminer   http://localhost:$$(sed -n 's/^ADMINER_PORT=//p' $(ROOT).env)/?pgsql=postgres&username=postgres"
 
 postgres-stop:
 	@$(DC) down

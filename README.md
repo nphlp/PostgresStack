@@ -1,8 +1,7 @@
 # PostgresStack
 
 Infrastructure de **développement local partagée** pour tous les stacks (Cubiing, GreenSense, …).
-Un seul serveur Postgres (**une base de données par application**), un seul Mailpit, et trois
-navigateurs DB (Adminer, pgAdmin, CloudBeaver) au choix.
+Un seul serveur Postgres (**une base de données par application**), un seul Mailpit, un seul Adminer.
 
 Ce dépôt remplace les `compose.postgres.yml` propres à chaque stack par une infra unique, consommée
 comme **sous-module git**. Il généralise le principe déjà en place dans GreenSense pour les worktrees :
@@ -16,21 +15,18 @@ si bien que démarrer un stack évinçait l'autre. Un stack unique partagé supp
 
 ## Services & ports
 
-| Service     | Conteneur                | Hôte                    | Description                                            |
-| ----------- | ------------------------ | ----------------------- | ------------------------------------------------------ |
-| Postgres    | `postgres-dev-shared`    | `5433`                  | Base `postgres` par défaut + une base par app (`cubiing-db`, `greensense-db`, …) |
-| Mailpit     | `mailpit-dev-shared`     | `1025` SMTP / `8025` UI | Boîte mail de dev partagée                             |
-| Adminer     | `adminer-dev-shared`     | `8081`                  | Navigateur DB léger (voit toutes les bases)            |
-| pgAdmin     | `pgadmin-dev-shared`     | `8082`                  | UI Postgres complète (connexion pré-configurée)        |
-| CloudBeaver | `cloudbeaver-dev-shared` | `8978`                  | DBeaver web (multi-SGBD, assistant au 1er lancement)   |
+| Service   | Conteneur             | Hôte                    | Description                                            |
+| --------- | --------------------- | ----------------------- | ------------------------------------------------------ |
+| Postgres  | `postgres-dev-shared` | `5433`                  | Base `postgres` par défaut + une base par app (`cubiing-db`, `greensense-db`, …) |
+| Mailpit   | `mailpit-dev-shared`  | `1025` SMTP / `8025` UI | Boîte mail de dev partagée                             |
+| Adminer   | `adminer-dev-shared`  | `8081`                  | Navigateur DB léger (voit toutes les bases)            |
 
-- Volumes : `postgres-dev-shared`, `pgadmin-dev-shared`, `cloudbeaver-dev-shared`
+- Volume : `postgres-dev-shared`
 - Réseau : `dev-postgres-network` (bridge nommé)
 
-Trois navigateurs DB sont fournis (au choix) : **Adminer** (léger), **pgAdmin** (riche, spécifique
-Postgres, connexion pré-enregistrée via `pgadmin/servers.json`), **CloudBeaver** (version web de
-DBeaver). Prisma Studio est **spécifique au schéma** d'une app, donc il reste côté stack hôte
-(Cubiing : `make prisma-studio`, ou `bunx prisma studio`).
+`make postgres` affiche l'URL Adminer avec les **search params pré-remplis**
+(`/?pgsql=postgres&username=postgres`) — il ne reste qu'à taper le mot de passe. Prisma Studio est
+**spécifique au schéma** d'une app, donc il reste côté stack hôte (Cubiing : `make prisma-studio`).
 
 ## Commandes
 
