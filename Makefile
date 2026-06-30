@@ -15,7 +15,7 @@ postgres: $(ROOT).env
 	@echo ""
 	@echo "🐘 Postgres  localhost:$$(sed -n 's/^POSTGRES_PORT=//p' $(ROOT).env)"
 	@echo "📬 Mailpit   http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
-	@echo "🗄  Adminer   http://localhost:$$(sed -n 's/^ADMINER_PORT=//p' $(ROOT).env)/?pgsql=postgres&username=postgres"
+	@echo "🗄  AdminNeo  http://localhost:$$(sed -n 's/^ADMINNEO_PORT=//p' $(ROOT).env)/?username=postgres"
 
 postgres-stop:
 	@$(DC) down

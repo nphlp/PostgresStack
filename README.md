@@ -1,7 +1,7 @@
 # PostgresStack
 
 Infrastructure de **développement local partagée** pour tous les stacks (Cubiing, GreenSense, …).
-Un seul serveur Postgres (**une base de données par application**), un seul Mailpit, un seul Adminer.
+Un seul serveur Postgres (**une base de données par application**), un seul Mailpit, un seul AdminNeo.
 
 Ce dépôt remplace les `compose.postgres.yml` propres à chaque stack par une infra unique, consommée
 comme **sous-module git**. Il généralise le principe déjà en place dans GreenSense pour les worktrees :
@@ -19,19 +19,20 @@ si bien que démarrer un stack évinçait l'autre. Un stack unique partagé supp
 | --------- | --------------------- | ----------------------- | ------------------------------------------------------ |
 | Postgres  | `postgres-dev-shared` | `5433`                  | Base `postgres` par défaut + une base par app (`cubiing-db`, `greensense-db`, …) |
 | Mailpit   | `mailpit-dev-shared`  | `1025` SMTP / `8025` UI | Boîte mail de dev partagée                             |
-| Adminer   | `adminer-dev-shared`  | `8081`                  | Navigateur DB léger (voit toutes les bases)            |
+| AdminNeo  | `adminneo-dev-shared` | `8081`                  | Navigateur DB (fork d'Adminer, thèmes light/dark, voit toutes les bases) |
 
 - Volume : `postgres-dev-shared`
 - Réseau : `dev-postgres-network` (bridge nommé)
 
-`make postgres` affiche l'URL Adminer avec les **search params pré-remplis**
-(`/?pgsql=postgres&username=postgres`) — il ne reste qu'à taper le mot de passe. Prisma Studio est
+**AdminNeo** (fork moderne d'Adminer) gère le **light/dark** nativement. `NEO_DEFAULT_DRIVER`/
+`NEO_DEFAULT_SERVER` pré-remplissent le pilote + le serveur sur le formulaire, et `make postgres`
+affiche l'URL avec `?username=postgres` — il ne reste qu'à taper le mot de passe. Prisma Studio est
 **spécifique au schéma** d'une app, donc il reste côté stack hôte (Cubiing : `make prisma-studio`).
 
 ## Commandes
 
 ```bash
-make postgres        # démarre Postgres + Mailpit + Adminer (crée .env depuis .env.example au 1er run)
+make postgres        # démarre Postgres + Mailpit + AdminNeo (crée .env depuis .env.example au 1er run)
 make postgres-stop   # arrête la stack (conserve les données)
 make postgres-clear  # détruit le volume partagé (toutes les bases de toutes les apps) — destructif
 make psql            # psql interactif dans le serveur partagé

@@ -41,14 +41,16 @@ services:
                 aliases:
                     - mailpit
 
-    adminer:
-        image: adminer:latest
-        container_name: adminer-dev-shared
+    adminneo:
+        image: adminneoorg/adminneo:latest
+        container_name: adminneo-dev-shared
         restart: unless-stopped
         environment:
-            - ADMINER_DEFAULT_SERVER=postgres
+            # Pre-fill driver + server on the login form (only the password remains to type).
+            - NEO_DEFAULT_DRIVER=pgsql
+            - NEO_DEFAULT_SERVER=postgres
         ports:
-            - "${ADMINER_PORT}:8080"
+            - "${ADMINNEO_PORT}:8080"
         depends_on:
             postgres:
                 condition: service_healthy
