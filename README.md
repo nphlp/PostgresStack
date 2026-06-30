@@ -25,9 +25,10 @@ si bien que démarrer un stack évinçait l'autre. Un stack unique partagé supp
 - Réseau : `dev-postgres-network` (bridge nommé)
 
 **AdminNeo** (fork moderne d'Adminer) gère le **light/dark** nativement. `NEO_DEFAULT_DRIVER`/
-`NEO_DEFAULT_SERVER` pré-remplissent le pilote + le serveur sur le formulaire, et `make postgres`
-affiche l'URL avec `?username=postgres` — il ne reste qu'à taper le mot de passe. Prisma Studio est
-**spécifique au schéma** d'une app, donc il reste côté stack hôte (Cubiing : `make prisma-studio`).
+`NEO_DEFAULT_SERVER` pré-remplissent le pilote + le serveur sur le formulaire ; il ne reste qu'à
+taper l'utilisateur + le mot de passe (`postgres` / `postgres`). Les stacks hôtes peuvent afficher
+un **Quick Link** ciblant directement leur base (`?…&db=<app>-db`). Prisma Studio est **spécifique
+au schéma** d'une app, donc il reste côté stack hôte (Cubiing : `make prisma-studio`).
 
 ## Commandes
 
@@ -64,12 +65,12 @@ fonctionne depuis le dépôt, depuis le chemin du sous-module dans un stack hôt
    La base applicative est créée par le setup du stack hôte (`make app-setup` / migrations), pas ici.
 3. Pointer le `DATABASE_URL` du stack vers la base partagée :
    ```
-   DATABASE_URL=postgres://postgres:password@localhost:5433/<app>-db
+   DATABASE_URL=postgres://postgres:postgres@localhost:5433/<app>-db
    ```
 4. Sur un clone neuf : `git submodule update --init --recursive`.
 
 ## Modèle d'identifiants
 
-Superutilisateur de dev **partagé** (`postgres` + un mot de passe de dev unique, `password`), avec
+Superutilisateur de dev **partagé** (`postgres` + un mot de passe de dev `postgres`), avec
 **une base par app**. Identifiants de dev local uniquement — ne jamais les utiliser au-delà de localhost.
 Si une isolation plus forte devient nécessaire, on bascule vers un rôle + une base dédiés par app.
