@@ -9,7 +9,7 @@ DC   := docker compose --env-file $(ROOT).env -f $(ROOT)compose.yml
 $(ROOT).env:
 	@cp $(ROOT).env.example $(ROOT).env
 
-# Start the shared stack (Postgres + Mailpit + Adminer).
+# Start the shared stack (Postgres + Mailpit + AdminNeo).
 postgres: $(ROOT).env
 	@$(DC) up -d --wait
 	@echo ""
@@ -17,11 +17,12 @@ postgres: $(ROOT).env
 	@echo "📬 Mailpit   http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
 	@echo "🗄  AdminNeo  http://localhost:$$(sed -n 's/^ADMINNEO_PORT=//p' $(ROOT).env)"
 
-postgres-stop:
+# Depend on .env too: `down`/`down -v` pass --env-file, which fails if .env was removed.
+postgres-stop: $(ROOT).env
 	@$(DC) down
 
 # Destroy the shared data volume (all apps' databases). Destructive.
-postgres-clear:
+postgres-clear: $(ROOT).env
 	@$(DC) down -v
 
 # Interactive psql into the shared server (connects to the default `postgres` database).
