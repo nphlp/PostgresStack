@@ -60,13 +60,13 @@ fonctionne depuis le dépôt, depuis le chemin du sous-module dans un stack hôt
    ```
 3. Pointer le `DATABASE_URL` du stack vers la base partagée :
    ```
-   DATABASE_URL=postgres://postgres:dev-password@localhost:5435/<app>-db
+   DATABASE_URL=postgres://postgres:password@localhost:5435/<app>-db
    ```
 4. Sur un clone neuf : `git submodule update --init --recursive`.
 
 ## Modèle d'identifiants
 
-Superutilisateur de dev **partagé** (`postgres` + un mot de passe de dev unique, `dev-password`), avec
+Superutilisateur de dev **partagé** (`postgres` + un mot de passe de dev unique, `password`), avec
 **une base par app**. Identifiants de dev local uniquement — ne jamais les utiliser au-delà de localhost.
 Si une isolation plus forte devient nécessaire, on bascule vers un rôle + une base dédiés par app via
 `scripts/ensure-db.sh`.
