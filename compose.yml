@@ -1,0 +1,65 @@
+name: dev-postgres
+
+# Shared local dev infrastructure for ALL stacks (Cubiing, GreenSense, …).
+# One Postgres server (one database per app), one Mailpit, one Adminer.
+# Consumed as a git submodule; `make postgres` works from here or any host repo.
+# Reads .env (copy from .env.example).
+
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: postgres-dev-shared
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            # No POSTGRES_DB: each app creates its own database (cubiing-db, greensense-db, …).
+        ports:
+            - "${POSTGRES_PORT}:5432"
+        volumes:
+            - postgres-dev-shared:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+            interval: 2s
+            timeout: 1s
+            retries: 30
+            start_period: 10s
+        networks:
+            dev-postgres-network:
+                aliases:
+                    - postgres
+
+    mailpit:
+        image: axllent/mailpit:latest
+        container_name: mailpit-dev-shared
+        restart: unless-stopped
+        ports:
+            - "${MAILPIT_SMTP_PORT}:1025"
+            - "${MAILPIT_UI_PORT}:8025"
+        networks:
+            dev-postgres-network:
+                aliases:
+                    - mailpit
+
+    adminer:
+        image: adminer:latest
+        container_name: adminer-dev-shared
+        restart: unless-stopped
+        environment:
+            - ADMINER_DEFAULT_SERVER=postgres
+        ports:
+            - "${ADMINER_PORT}:8080"
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - dev-postgres-network
+
+volumes:
+    postgres-dev-shared:
+        name: postgres-dev-shared
+
+networks:
+    dev-postgres-network:
+        name: dev-postgres-network
+        driver: bridge
