@@ -55,9 +55,48 @@ services:
         networks:
             - dev-postgres-network
 
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin-dev-shared
+        restart: unless-stopped
+        environment:
+            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+            # Skip the master-password prompt for local dev.
+            - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+        ports:
+            - "${PGADMIN_PORT}:80"
+        volumes:
+            # Pre-register the shared server (auto-imported on first launch).
+            - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+            - pgadmin-dev-shared:/var/lib/pgadmin
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - dev-postgres-network
+
+    cloudbeaver:
+        image: dbeaver/cloudbeaver:latest
+        container_name: cloudbeaver-dev-shared
+        restart: unless-stopped
+        ports:
+            - "${CLOUDBEAVER_PORT}:8978"
+        volumes:
+            - cloudbeaver-dev-shared:/opt/cloudbeaver/workspace
+        depends_on:
+            postgres:
+                condition: service_healthy
+        networks:
+            - dev-postgres-network
+
 volumes:
     postgres-dev-shared:
         name: postgres-dev-shared
+    pgadmin-dev-shared:
+        name: pgadmin-dev-shared
+    cloudbeaver-dev-shared:
+        name: cloudbeaver-dev-shared
 
 networks:
     dev-postgres-network:

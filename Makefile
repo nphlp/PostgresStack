@@ -3,7 +3,7 @@
 ROOT := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 DC   := docker compose --env-file $(ROOT).env -f $(ROOT)compose.yml
 
-.PHONY: postgres postgres-stop postgres-clear psql logs ensure-db
+.PHONY: postgres postgres-stop postgres-clear psql
 
 # Bootstrap .env from the example on first run.
 $(ROOT).env:
@@ -13,9 +13,11 @@ $(ROOT).env:
 postgres: $(ROOT).env
 	@$(DC) up -d --wait
 	@echo ""
-	@echo "🐘 Postgres  localhost:$$(sed -n 's/^POSTGRES_PORT=//p' $(ROOT).env)"
-	@echo "📬 Mailpit   http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
-	@echo "🗄  Adminer   http://localhost:$$(sed -n 's/^ADMINER_PORT=//p' $(ROOT).env)"
+	@echo "🐘 Postgres    localhost:$$(sed -n 's/^POSTGRES_PORT=//p' $(ROOT).env)"
+	@echo "📬 Mailpit     http://localhost:$$(sed -n 's/^MAILPIT_UI_PORT=//p' $(ROOT).env)"
+	@echo "🗄  Adminer     http://localhost:$$(sed -n 's/^ADMINER_PORT=//p' $(ROOT).env)"
+	@echo "🐘 pgAdmin     http://localhost:$$(sed -n 's/^PGADMIN_PORT=//p' $(ROOT).env)"
+	@echo "🦫 CloudBeaver http://localhost:$$(sed -n 's/^CLOUDBEAVER_PORT=//p' $(ROOT).env)"
 
 postgres-stop:
 	@$(DC) down
@@ -24,13 +26,6 @@ postgres-stop:
 postgres-clear:
 	@$(DC) down -v
 
-# Interactive psql into the shared server.
+# Interactive psql into the shared server (connects to the default `postgres` database).
 psql:
 	@docker exec -it postgres-dev-shared psql -U postgres
-
-logs:
-	@$(DC) logs -f
-
-# Create a database on the shared server if it doesn't exist: `make ensure-db DB=greensense-db`.
-ensure-db:
-	@bash $(ROOT)scripts/ensure-db.sh "$(DB)"
