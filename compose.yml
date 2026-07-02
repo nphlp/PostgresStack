@@ -51,9 +51,9 @@ services:
             - NEO_DEFAULT_SERVER=postgres
         ports:
             - "${ADMINNEO_PORT}:8080"
-        depends_on:
-            postgres:
-                condition: service_healthy
+        # No depends_on: AdminNeo is a stateless PHP UI that only connects to
+        # Postgres when you submit the login form, so it can boot in parallel
+        # instead of waiting for postgres to be healthy first (~5s faster).
         # Override the image's built-in healthcheck: it ships without interval/
         # start_period, so Docker's 30s default interval delays the first probe
         # (and `up --wait`) by ~30s even though PHP-FPM is ready in seconds.
