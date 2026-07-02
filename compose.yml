@@ -54,6 +54,15 @@ services:
         depends_on:
             postgres:
                 condition: service_healthy
+        # Override the image's built-in healthcheck: it ships without interval/
+        # start_period, so Docker's 30s default interval delays the first probe
+        # (and `up --wait`) by ~30s even though PHP-FPM is ready in seconds.
+        healthcheck:
+            test: ["CMD-SHELL", "curl --silent --fail http://127.0.0.1:8080/fpm-ping || exit 1"]
+            interval: 2s
+            timeout: 5s
+            retries: 30
+            start_period: 2s
         networks:
             - dev-postgres-network
 
