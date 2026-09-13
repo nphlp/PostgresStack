@@ -1,0 +1,76 @@
+name: dev-postgres
+
+# Shared local dev infrastructure for all consumer projects.
+# One Postgres server (one database per app), one Mailpit, one AdminNeo.
+# Consumed as a git submodule; `make postgres` works from here or any host repo.
+# Reads .env (copy from .env.example).
+
+services:
+    postgres:
+        image: postgres:16-alpine
+        container_name: postgres-dev-shared
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            # No POSTGRES_DB: each app creates its own database.
+        ports:
+            - "${POSTGRES_PORT}:5432"
+        volumes:
+            - postgres-dev-shared:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+            interval: 2s
+            timeout: 1s
+            retries: 30
+            start_period: 10s
+        networks:
+            dev-postgres-network:
+                aliases:
+                    - postgres
+
+    mailpit:
+        image: axllent/mailpit:latest
+        container_name: mailpit-dev-shared
+        restart: unless-stopped
+        ports:
+            - "${MAILPIT_SMTP_PORT}:1025"
+            - "${MAILPIT_UI_PORT}:8025"
+        networks:
+            dev-postgres-network:
+                aliases:
+                    - mailpit
+
+    adminneo:
+        image: adminneoorg/adminneo:latest
+        container_name: adminneo-dev-shared
+        restart: unless-stopped
+        environment:
+            # Pre-fill driver + server on the login form (only the password remains to type).
+            - NEO_DEFAULT_DRIVER=pgsql
+            - NEO_DEFAULT_SERVER=postgres
+        ports:
+            - "${ADMINNEO_PORT}:8080"
+        # No depends_on: AdminNeo is a stateless PHP UI that only connects to
+        # Postgres when you submit the login form, so it can boot in parallel
+        # instead of waiting for postgres to be healthy first (~5s faster).
+        # Override the image's built-in healthcheck: it ships without interval/
+        # start_period, so Docker's 30s default interval delays the first probe
+        # (and `up --wait`) by ~30s even though PHP-FPM is ready in seconds.
+        healthcheck:
+            test: ["CMD-SHELL", "curl --silent --fail http://127.0.0.1:8080/fpm-ping || exit 1"]
+            interval: 2s
+            timeout: 5s
+            retries: 30
+            start_period: 2s
+        networks:
+            - dev-postgres-network
+
+volumes:
+    postgres-dev-shared:
+        name: postgres-dev-shared
+
+networks:
+    dev-postgres-network:
+        name: dev-postgres-network
+        driver: bridge
